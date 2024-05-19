@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title>Delete Account - FeelTheCoder</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <!-- Include SweetAlert library (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-analytics.js";
+
+        import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDmx_RSG6pdKB15gdoceIs8nBgpMJraUU",
+            authDomain: "feelthecoder-8b674.firebaseapp.com",
+            projectId: "feelthecoder-8b674",
+            storageBucket: "feelthecoder-8b674.appspot.com",
+            databaseURL: "https://feelthecoder-8b674-default-rtdb.asia-southeast1.firebasedatabase.app",
+            messagingSenderId: "536481708084",
+            appId: "1:536481708084:web:4a71a0019c51b979223261",
+            measurementId: "G-P6EJR4FWRB"
+        };
+
+        // Initialize Firebase
+        const firebase = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(firebase);
+
+        const database = getDatabase(firebase)
+        const deletionsRef = ref(database, 'accountDeletions'); // Update to match your database path
+
+        // Function to validate mobile number format
+        function isValidMobile(mobile) {
+            // Regular expression to check for a valid 10-digit mobile number
+            const mobilePattern = /^[0-9]{10}$/;
+            return mobilePattern.test(mobile);
+        }
+
+        // Function to validate email format
+        function isValidEmail(email) {
+            // Regular expression to check for a valid email format
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailPattern.test(email);
+        }
+
+
+        // Function to delete account
+        async function deleteAccount() {
+
+            try {
+                const name = document.getElementById("nameInput").value;
+                const mobile = document.getElementById("mobileInput").value;
+                const email = document.getElementById("emailInput").value;
+                const selectedAppName = document.getElementById("appNameSelect").value;
+
+
+
+                if (name.trim() === '') {
+                    return false;
+                }
+
+                // Check if mobile number is empty and is a valid format
+                if (mobile.trim() === '') {
+                    return;
+                } else if (!isValidMobile(mobile)) {
+                    return;
+                }
+
+                // Check if email is empty and is a valid format
+                if (email.trim() === '') {
+                    return;
+                } else if (!isValidEmail(email)) {
+                    return;
+                }
+
+                // Check if an app name is selected
+                if (selectedAppName === '') {
+                    return;
+                }
+
+
+                const deletionData = {
+                    name: name,
+                    mobile: mobile,
+                    email: email,
+                    appName: selectedAppName,
+                    deletionTimestamp: new Date().toISOString()
+                };
+
+                push(deletionsRef, deletionData)
+
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Your account & data will be deleted within 30 days.',
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    // Reload the Page
+                    location.reload();
+                });
+                console.log('saved')
+            } catch (error) {
+                console.error('Error adding data to Firebase:', error);
+
+                // Show error message using SweetAlert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to add data to the database. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+            }
+
+
+
+
+        }
+
+        window.deleteAccount = deleteAccount
+
+
+
+    </script>
+
+
+
+    <header class="header">
+        <h1>Welcome to FeelTheCoder</h1>
+        <p>Delete My Account</p>
+    </header>
+
+    <div class="container">
+        <div class="delete-form">
+            <div class="input-group">
+                <label for="nameInput">Name:</label>
+                <input type="text" id="nameInput" placeholder="Enter your name" required>
+            </div>
+            <div class="input-group">
+                <label for="mobileInput">Mobile Number:</label>
+                <input type="text" id="mobileInput" placeholder="Enter your mobile number" pattern="[0-9]{10}" required>
+            </div>
+            <div class="input-group">
+                <label for="emailInput">Email:</label>
+                <input type="email" id="emailInput" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label for="appNameSelect">Select App Name:</label>
+                <select id="appNameSelect">
+                    <option value="com.feelthecoder.dsc">DSC REC Bijnor</option>
+                    <option value="com.feelthecoder.viddownloader">Vid Downloader</option>
+                    <option value="com.feeltheocder.unitconverter">Unit Converter</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <button type="button" onclick="deleteAccount()">Delete My Account</button>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
